@@ -3,7 +3,7 @@ CRYPTO EXCHANGE PLATFORM
 
 Designed to learn OOP concepts.
 
-So, Highly organized.Made easy to understand the code.
+So, Highly organized.Text based.Made easy to understand the code.
 Headers are seperated for different tasks.
 You can see headers, their definitions(.cpp) files seperatelty.
 Main function is super clean.
