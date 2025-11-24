@@ -9,7 +9,10 @@ You can see headers, their definitions(.cpp) files seperatelty.
 Main function is super clean.
 Also comments are added for the better understandation of the code.
 
-U can run the programe from the main() function.
+HOW TO RUN.
+-------------------------------------------
+Just take the files inside the CryptoExchangePlatform and put them in your project main folder.
+compile and run.
 
 You are given your own wallet.
 With some sample currencies like BTC,ETH to do trades.
