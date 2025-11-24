@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="CrptoExchangePlatform/CrptoExchangePlatform.vcxproj" Id="27cf530c-613c-4677-ba44-0a2b201a1bab" />
+</Solution>
