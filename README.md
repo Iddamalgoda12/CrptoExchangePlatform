@@ -1,4 +1,4 @@
-#CrptoExchangePlatform
+CrptoExchangePlatform
 
 Designed to learn OOP concepts.
 
