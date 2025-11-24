@@ -1,4 +1,5 @@
-CrptoExchangePlatform
+CRYPTO EXCHANGE PLATFORM
+---------------------------------------------------------------------------
 
 Designed to learn OOP concepts.
 
