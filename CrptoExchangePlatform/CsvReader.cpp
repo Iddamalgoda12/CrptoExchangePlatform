@@ -2,6 +2,7 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
+#include <iomanip>
 
 
 CsvReader::CsvReader()   //constructor
@@ -33,6 +34,29 @@ std::vector <OrderBookEntry> CsvReader::readCsv(std::string csvFileName)        
 	return entries;
 }
 
+void CsvReader::truncateCsv(std::string csvFileName)
+{
+	std::ofstream csvFile(csvFileName, std::ios::trunc);
+}
+
+void CsvReader::appendOrdersToCsv(std::string csvFileName, const std::vector<OrderBookEntry>& entries)
+{
+	if (entries.empty())
+		return;
+
+	std::ofstream csvFile(csvFileName, std::ios::app);
+	if (!csvFile.is_open())
+		return;
+
+	csvFile << std::defaultfloat << std::setprecision(17);
+	for (const OrderBookEntry& e : entries)
+	{
+		csvFile << e.timestamp << ',' << e.product << ','
+			<< OrderBookEntry::orderBookTypeToString(e.orderType) << ','
+			<< e.price << ',' << e.amount << '\n';
+	}
+}
+
 
 std::vector<std::string> CsvReader::tokenise(std::string csvLine, char seperator)    //tokenize one full string to seperate strings and return it.
 {
@@ -54,6 +78,9 @@ std::vector<std::string> CsvReader::tokenise(std::string csvLine, char seperator
         { 
             token = csvLine.substr(start, csvLine.length() - start);
         }
+      
+        token.erase(0, token.find_first_not_of(" "));
+        token.erase(token.find_last_not_of(" ") + 1);
         tokens.push_back(token);
         start = end + 1;
 

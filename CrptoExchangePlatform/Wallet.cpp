@@ -16,7 +16,6 @@ void Wallet::insertCurrency(std::string type, double amount)
 
     balance = balance + amount;            //adds the amount we want to the balance.
     currencies[type] = balance;            //stores the correct currency.
-
 }
 
 bool Wallet::removeCurrency(std::string type, double amount)
@@ -76,14 +75,16 @@ bool Wallet::canFulfillOrder(OrderBookEntry order)   //ask- BTC/ETH sells for ET
     return false;
 }
 
+//wallet handling.
 void Wallet::processSale(OrderBookEntry& sale)
 {
     std::vector<std::string> currs = CsvReader::tokenise(sale.product, '/');  //tokenize "BTC/ETH" in to "BTC" , "ETH".
+    
     //asksales
     if (sale.orderType == OrderBookType::asksale)
     {
         double outgoingAmount = sale.amount;                 // amount BTC user need to sell.
-        std::string outgoingCurrency = currs[0];              //user is asks to sell BTC,so it outgoes.
+        std::string outgoingCurrency = currs[0];              //user asks to sell BTC,so it outgoes.
         
         double incomingAmount = sale.amount * sale.price;          // amount ETH user received.
         std::string incomingCurrency = currs[1];
@@ -110,7 +111,7 @@ void Wallet::processSale(OrderBookEntry& sale)
 
 void Wallet::printWallet(Wallet wallet)
 {
-    std::cout << "Your wallet" << std::endl;                                   //printswallet.
+    std::cout << "Your wallet" << std::endl;                                   //prints wallet.
     std::cout << "--------------------" << std::endl;
     std::string myWallet = wallet.toString();
     if (myWallet == "") std::cout << "Your wallet is empty" << std::endl;

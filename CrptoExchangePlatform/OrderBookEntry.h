@@ -3,7 +3,7 @@
 #pragma once
 #include <string>
 
-enum class OrderBookType { bid, ask,unknown,asksale ,bidsale}; //this is like defining our own data type with only bid and ask.
+enum class OrderBookType { bid, ask, sale, asksale, bidsale, unknown}; //this is like defining our own data type with only bid and ask.
 
 
 class OrderBookEntry
@@ -21,6 +21,7 @@ public:
 	OrderBookEntry(double _price, double _amount, std::string _timestamp, std::string _product, OrderBookType _orderType, std::string _userName="dataset");  //default username set to "dataset".
 	//a small function to convert string to {ask.bid} type.
 	static OrderBookType stringToOrderBookType(std::string s);
+	static std::string orderBookTypeToString(OrderBookType t);
 
 	static bool compareByTimestamp(OrderBookEntry& e1, OrderBookEntry& e2);  //this is for insertORder() func in OB class.
 

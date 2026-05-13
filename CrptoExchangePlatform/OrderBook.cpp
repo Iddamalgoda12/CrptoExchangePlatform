@@ -1,6 +1,8 @@
 #include "OrderBook.h"
 #include "CsvReader.h"
 #include <map>
+#include <deque>
+#include <unordered_set>
 
 
 /**construct,reads csv file*/
@@ -12,23 +14,26 @@ OrderBook::OrderBook(std::string fileName)
 /**return a vector of all known products in the data set*/
 std::vector<std::string> OrderBook::getKnownProducts()
 {
-	std::vector<std::string> products;
-	std::map<std::string, bool> prodMap;
-	for (const OrderBookEntry& e : orders)       //loops over orders and find unique producs like BTC/ETH and stores them in map.
+	std::unordered_set<std::string> productsSet;
+
+	// Insert unique product names into unordered_set
+	for (const OrderBookEntry& e : orders)
 	{
-		prodMap[e.product] = true;     
+		productsSet.insert(e.product);
 	}
 
-	for (auto const& e : prodMap)               //loops over the map and stores those unique products in a vector.
+	// Convert unordered_set to vector
+	std::vector<std::string> products;
+
+	for (const std::string& product : productsSet)
 	{
-		products.push_back(e.first);
+		products.push_back(product);
 	}
 
 	return products;
-
 }
 
-/**returns a vector of orders according to the sent filters*/
+/**searches in the orderbook according to the sent filters and return them*/
 std::vector<OrderBookEntry> OrderBook::getOrders(OrderBookType type, std::string product, std::string timestamp)
 {
 	std::vector<OrderBookEntry> order_sub;
@@ -79,7 +84,7 @@ std::string OrderBook::getNextTime(std::string timestamp)
 			break;
 		}
 	}
-	if (next_timestamp == "") orders[0].timestamp;
+	if (next_timestamp == "") next_timestamp = orders[0].timestamp;
 
 	return next_timestamp;
 
@@ -102,83 +107,56 @@ void OrderBook::insertOrder(OrderBookEntry& order)
 
 
 
-
-
-std::vector<OrderBookEntry> OrderBook::matchAsksToBids(std::string product,std::string timestamp)  //ETH/BTC , 5 A.M.
+std::vector<OrderBookEntry> OrderBook::matchAsksToBids(std::string product, std::string timestamp)
 {
-
-	std::vector<OrderBookEntry> asks = getOrders(OrderBookType::ask, product, timestamp);  //all asks of that time and product type..
-	std::vector<OrderBookEntry> bids = getOrders(OrderBookType::bid, product, timestamp);  //all sales of that time.
-
+	std::vector<OrderBookEntry> askVec = getOrders(OrderBookType::ask, product, timestamp);
+	std::vector<OrderBookEntry> bidVec = getOrders(OrderBookType::bid, product, timestamp);
 	std::vector<OrderBookEntry> sales;
 
-	if (asks.size() == 0 || bids.size() == 0)
+	if (askVec.empty() || bidVec.empty()) return sales;
+
+	std::sort(askVec.begin(), askVec.end(),OrderBookEntry::compareByPriceAsc);   //sorting ASC
+	std::sort(bidVec.begin(), bidVec.end(),OrderBookEntry::compareByPriceDec);   //sorting DEC
+
+	std::deque<OrderBookEntry> asks(askVec.begin(), askVec.end());                //deques.
+	std::deque<OrderBookEntry> bids(bidVec.begin(), bidVec.end());
+
+	while (!asks.empty() && !bids.empty())
 	{
-		std::cout << " OrderBook::matchAsksToBids no bids or asks" << std::endl;
-		return sales;
-	}
+		OrderBookEntry& ask = asks.front();   //not pop,just access front.
+		OrderBookEntry& bid = bids.front();
 
-	  //completed ask-bid means sales stored here.
+		if (bid.price < ask.price)
+			break;
 
-	std::sort(asks.begin(), asks.end(), OrderBookEntry::compareByPriceAsc);   //sort asks by ascending order.
-	std::sort(bids.begin(), bids.end(), OrderBookEntry::compareByPriceDec);    //sort bids by decending order.
+		double tradedAmount =std::min(ask.amount, bid.amount);  //minimum of both ask,bid as the sale.
 
-	std::cout << "Asks: " << asks.size() << " Bids: " << bids.size() << std::endl;
+		OrderBookEntry sale{
+			ask.price,
+			tradedAmount,
+			timestamp,
+			product,
+			OrderBookType::sale
+		};
 
-	for (OrderBookEntry& ask : asks)       //sorted from lowest
-	{
-		
-		for (OrderBookEntry& bid : bids)       //sorted from highest
+		if (bid.userName == "user1")
 		{
-			
-			if (bid.price >= ask.price)// Normally this is true lots of times.-----------------//high priority for the lowest asker,and for the highest bidder.
-			{	                                                                                 //those two solved first.Normally this is true lots of times.
-
-				OrderBookEntry sale{ ask.price ,0/*default amount*/ ,timestamp ,product ,OrderBookType::asksale };  //created new object to store solved ask-bids means sales.
-				if (bid.userName == "simuser")
-				{
-					sale.userName = "simuser";                       // if the user is the one making the bid,it's then a bidsale.
-					sale.orderType = OrderBookType::bidsale;
-				}
-				if (ask.userName == "simuser")
-				{
-					sale.userName = "simuser";                       // if the user is the one making the ask,it's then a asksale.
-					sale.orderType = OrderBookType::asksale;
-				}
-				   	                                                                              
-				/*always solves for ask price even though bidder like to pay more.*/
-				if (bid.amount == ask.amount)   //now check the amounts.
-				{
-					sale.amount = ask.amount;
-					sales.push_back(sale);
-					bid.amount = 0;
-					break;                        //ask is completed.so break and go to next ask.
-
-				}
-				if (bid.amount > ask.amount)
-				{
-					sale.amount = ask.amount;
-					sales.push_back(sale);
-					bid.amount = bid.amount - ask.amount;
-					break;
-
-				}
-				if (bid.amount < ask.amount && bid.amount > 0)
-				{
-					sale.amount = bid.amount;
-					sales.push_back(sale);
-					ask.amount = ask.amount - bid.amount;
-					bid.amount = 0;
-
-					continue;                                         //continue in this cause ask amount is not filled.
-				}
-
-
-			}
+			sale.orderType = OrderBookType::bidsale;
 		}
 
+		else if (ask.userName == "user1")
+		{
+			sale.orderType = OrderBookType::asksale;
+		}
+
+		sales.push_back(sale);
+
+		ask.amount = ask.amount - tradedAmount;
+		bid.amount = bid.amount - tradedAmount;
+
+		if (ask.amount == 0) asks.pop_front();
+		if (bid.amount == 0) bids.pop_front();
 	}
+
 	return sales;
-
-
 }

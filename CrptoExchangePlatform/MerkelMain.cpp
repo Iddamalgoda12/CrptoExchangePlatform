@@ -3,231 +3,459 @@
 #include <map>
 #include <vector>
 #include "CsvReader.h"
+#include <iomanip>
+#include <windows.h>
+
+using namespace std;
 
 MerkelMain::MerkelMain() {}
 
 void MerkelMain::init()
 {
-    wallet.insertCurrency("BTC", 5);
-    wallet.insertCurrency("ETH", 100);
-    currentTime = orderBook.getEarliestTime();  //sets current time to the earliest time.
+    wallet1.insertCurrency("BTC", 5);
+    wallet1.insertCurrency("ETH", 100);
+    currentTime = orderBook.getEarliestTime();
+    CsvReader::truncateCsv("sales.csv");
+
     int input;
+
     while (true)
     {
         printMenu();
         input = getUserOption();
         processUserOption(input);
     };
-
 }
 
 void MerkelMain::printMenu()
 {
-	std::cout << "======================" << std::endl;
-	std::cout << "1:Print help" << std::endl;
-	std::cout << "2:Print exchange stats" << std::endl;
-	std::cout << "3:Place an ask" << std::endl;
-	std::cout << "4:Place a bid" << std::endl;
-	std::cout << "5:Manage wallet" << std::endl;
-	std::cout << "6:Continue/Process orders" << std::endl;
-	std::cout << "======================" << std::endl;
+    cout << "========================================================================" << endl;
 
-    std::cout << "CurrentTime :" << currentTime<< std::endl;
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+    cout << "                              MERKEL TRADE                              " << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "========================================================================" << endl;
+
+    cout << "  1:Print help" << endl;
+    cout << "  2:Print exchange stats" << endl;
+    cout << "  3:Place an Ask(sell)" << endl;
+    cout << "  4:Place a Bid(buy)" << endl;
+    cout << "  5:Manage wallet" << endl;
+    cout << "  6:Continue/Process orders" << endl;
+
+    cout << "========================================================================" << endl;
+
+    cout << "CurrentTime :" << currentTime << endl;
 }
 
 int MerkelMain::getUserOption()
 {
-	int userOption=0;
-    std::string line;
-    std::cout << "Type in 1-6" << std::endl;
-    std::getline(std::cin, line);                       //using cin causes some unexpected problems.thats why we use getline().
-    try 
+    int userOption = 0;
+    string line;
+
+    cout << "Type in 1-6" << endl << endl;
+
+    getline(cin, line);
+
+    try
     {
-        userOption = std::stoi(line);
+        userOption = stoi(line);
     }
-    catch (std::exception& e)
+    catch (exception& e)
     {
-        //
+
     }
-	return userOption;
+
+    return userOption;
 }
 
 void MerkelMain::printHelp()
 {
-	std::cout << "Help - choose options from the menu" << std::endl;
-	std::cout << "and follow the on screen instructions." << std::endl;
+    cout << "========================================================================" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+    cout << "                              MERKEL TRADE                              " << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
+    cout << "                               HELP GUIDE                               " << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "========================================================================" << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "WHAT IS THIS PROGRAM?" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "------------------------------------------------------------------------" << endl;
+
+    cout << "This is a simulated cryptocurrency exchange." << endl;
+    cout << "You can view market prices, place buy/sell orders," << endl;
+    cout << "and manage your wallet using real historical data." << endl;
+    cout << "Your starting wallet: 5 BTC and 100 ETH." << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "MENU OPTIONS EXPLAINED:" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "------------------------------------------------------------------------" << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "[1] Print Help" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "    Shows this help guide." << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "[2] Print Exchange Stats" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "    Shows market data for the current time frame." << endl;
+    cout << "    Displays all available trading pairs (e.g. ETH/BTC, DOGE/BTC)." << endl;
+    cout << "    For each pair you will see:" << endl;
+    cout << "      - Number of active ask orders" << endl;
+    cout << "      - Highest ask price" << endl;
+    cout << "      - Lowest ask price" << endl;
+    cout << "      - Average ask price" << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "[3] Place an Ask (SELL)" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "    Use this to SELL a cryptocurrency." << endl;
+    cout << "    You will be asked to enter: product, price, amount" << endl;
+    cout << "      - Example input:  ETH/BTC ,0.02165,1" << endl;
+    cout << "      - This means: Sell 1 ETH at a price of 0.02165 BTC each." << endl;
+    cout << "    NOTE: You must have enough of the first currency (ETH)" << endl;
+    cout << "    in your wallet to place this order." << endl;
+    cout << "    The order will NOT execute until you press 6 (Process Orders)." << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "[4] Place a Bid (BUY)" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "    Use this to BUY a cryptocurrency." << endl;
+    cout << "    You will be asked to enter: product, price, amount" << endl;
+    cout << "      - Example input:  ETH/BTC,0.02125,3" << endl;
+    cout << "      - This means: Buy 3 ETH by paying 0.02125 BTC each (total 100 BTC)." << endl;
+    cout << "    NOTE: You must have enough of the second currency (BTC)" << endl;
+    cout << "    in your wallet to cover the total cost (price x amount)." << endl;
+    cout << "    The order will NOT execute until you press 6 (Process Orders)." << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "[5] Manage Wallet" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "    Opens the wallet menu where you can:" << endl;
+    cout << "      1 - Add currency" << endl;
+    cout << "      2 - Withdraw currency" << endl;
+    cout << "      3 - Return to the main menu" << endl;
+    cout << "    When adding or removing, enter in this format:" << endl;
+    cout << "      currency, amount  (e.g.  ETH, 10)" << endl;
+
+    cout << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+    cout << "[6] Continue / Process Orders" << endl;
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+    cout << "    Matches all pending ask and bid orders for the current time frame." << endl;
+    cout << "    If your order is matched, your wallet is updated automatically." << endl;
+    cout << "    After processing, the clock moves to the next time frame." << endl;
+    cout << "    Keep pressing 6 to simulate time passing in the market." << endl;
+
+    cout << endl;
+    cout << "========================================================================" << endl;
 }
 
 void MerkelMain::printMarketStatus()
 {
-   auto uniqueProducts= orderBook.getKnownProducts();    //calls the OB class function.
-   for (auto const& p : uniqueProducts)
-   {
-       std::cout <<"Product: " << p << std::endl;                                                          //loops and prints BTC/ETH like unique product types.
-       std::vector < OrderBookEntry > entries = orderBook.getOrders(OrderBookType::ask, p, currentTime);  //gives how many 'ask' entries are there for that unique product type,at CURRENTTIME.
-       std::cout << "No of entries:" << entries.size() << std::endl;                                      //we can change the current time by just pressing 6 now.so now we can see those orders at that time.
-       std::cout<< "Highest ask price:" << OrderBook::getHighPrice(entries) << std::endl;
-       std::cout << "Lowest ask price:" << OrderBook::getLowPrice(entries) << std::endl;
-       std::cout << "Average ask price:" << OrderBook::getMeanPrice(OrderBook::getHighPrice(entries), OrderBook::getLowPrice(entries)) << std::endl;
-   }
- 
+    auto uniqueProducts = orderBook.getKnownProducts();
+
+    for (auto const& p : uniqueProducts)
+    {
+        cout << "Product: ";
+
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
+        cout << p << endl;
+
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
+        vector<OrderBookEntry> askentries =
+            orderBook.getOrders(OrderBookType::ask, p, currentTime);
+
+        cout << " No of ASK entries:\t" << askentries.size() << endl;
+
+        cout << fixed << setprecision(6);
+
+        cout << " Highest ask price:\t"
+            << OrderBook::getHighPrice(askentries) << endl;
+
+        cout << " Lowest ask price:\t"
+            << OrderBook::getLowPrice(askentries) << endl;
+
+        cout << " Average ask price:\t"
+            << OrderBook::getMeanPrice(
+                OrderBook::getHighPrice(askentries),
+                OrderBook::getLowPrice(askentries))
+            << endl << endl;
+
+        cout << defaultfloat;
+
+        vector<OrderBookEntry> bidentries =
+            orderBook.getOrders(OrderBookType::bid, p, currentTime);
+
+        cout << " No of BID entries:\t" << bidentries.size() << endl;
+
+        cout << fixed << setprecision(6);
+
+        cout << " Highest bid price:\t"
+            << OrderBook::getHighPrice(bidentries) << endl;
+
+        cout << " Lowest bid price:\t"
+            << OrderBook::getLowPrice(bidentries) << endl;
+
+        cout << " Average bid price:\t"
+            << OrderBook::getMeanPrice(
+                OrderBook::getHighPrice(bidentries),
+                OrderBook::getLowPrice(bidentries))
+            << endl << endl;
+
+        cout << defaultfloat;
+    }
 }
 
-
-void MerkelMain::enterAsk()                         //takes an input "ETH/BTC ,200 , 0.5" and checks we have enough coins to do it.then stores in the orderbook.
+void MerkelMain::enterAsk()
 {
-    std::string input;
-	std::cout << "make an Ask"<<std::endl<<"Enter : product ,price amount eg) ETH/BTC ,200 , 0.5" << std::endl;
-    std::getline(std::cin, input);                                       //gets the user input string. eg)"ETH/BTC ,200 , 0.5".
-	std::cout <<"You typed:" << input << std::endl;
-    std::vector < std::string> tokens = CsvReader::tokenise(input,',');  //tokenized.
-    if (tokens.size() != 3)                                               
+    string input;
+
+    cout << "MAKE AN ASK:" << endl
+        << "Enter : product ,price amount eg) ETH/BTC ,0.02165,1" << endl;
+
+    getline(cin, input);
+
+    cout << "You typed:" << input << endl;
+
+    vector<string> tokens = CsvReader::tokenise(input, ',');
+
+    if (tokens.size() != 3)
     {
-        std::cout << "MerkelMain::enterAsk Bad input!" << input << std::endl;
+        cout << "MerkelMain::enterAsk Bad input!" << input << endl;
     }
     else
     {
         try
         {
-            OrderBookEntry obe = CsvReader::stringsToObe(tokens[1], tokens[2], currentTime, tokens[0], OrderBookType::ask);     //converting types and making a OBE object.
-            obe.userName = "simuser";
-            if (wallet.canFulfillOrder(obe))                             //check if we have enough coins to do that order.
+            OrderBookEntry obe =
+                CsvReader::stringsToObe(
+                    tokens[1],
+                    tokens[2],
+                    currentTime,
+                    tokens[0],
+                    OrderBookType::ask);
+
+            obe.userName = "user1";
+
+            if (wallet1.canFulfillOrder(obe))
             {
-                std::cout << "You have enough funds to do the order." << std::endl;
-                orderBook.insertOrder(obe);                                //then stores it.
+                cout << "You have enough funds to do the order." << endl;
+                orderBook.insertOrder(obe);
             }
             else
             {
-                std::cout << "Wallet has insufficient funds." << std::endl;
+                cout << "Wallet has insufficient funds." << endl;
             }
-            
         }
-        
-        catch (const std::exception& e)
+        catch (const exception& e)
         {
-            std::cout << "MerkelMain::enterAsk Bad input" << std::endl;
+            cout << "MerkelMain::enterAsk Bad input" << endl;
         }
-        
     }
 }
 
 void MerkelMain::enterBid()
 {
-    std::string input;
-    std::cout << "make an Bid" << std::endl << "Enter : product ,price amount eg) ETH/BTC ,200 , 0.5" << std::endl;
-    std::getline(std::cin, input);                                       //gets the user input string. eg)"ETH/BTC ,200 , 0.5".
-    std::cout << "You typed:" << input << std::endl;
-    std::vector < std::string> tokens = CsvReader::tokenise(input, ',');  //tokenized.
-    if (tokens.size() != 3)                                               //converting types and making a OBE object.
+    string input;
+
+    cout << "MAKE A BID" << endl
+        << "Enter : product ,price amount eg) ETH/BTC ,0.02125,3" << endl;
+
+    getline(cin, input);
+
+    cout << "You typed:" << input << endl;
+
+    vector<string> tokens = CsvReader::tokenise(input, ',');
+
+    if (tokens.size() != 3)
     {
-        std::cout << "MerkelMain::enterBid Bad input!" << input << std::endl;
+        cout << "MerkelMain::enterBid Bad input!" << input << endl;
     }
     else
     {
         try
         {
-            OrderBookEntry obe = CsvReader::stringsToObe(tokens[1], tokens[2], currentTime, tokens[0], OrderBookType::bid);  //converting types.
-            obe.userName = "simuser";
-            if (wallet.canFulfillOrder(obe))                             //check if we have enough coins to do that order.
+            OrderBookEntry obe =
+                CsvReader::stringsToObe(
+                    tokens[1],
+                    tokens[2],
+                    currentTime,
+                    tokens[0],
+                    OrderBookType::bid);
+
+            obe.userName = "user1";
+
+            if (wallet1.canFulfillOrder(obe))
             {
-                std::cout << "You have enough funds to do the order." << std::endl;
-                orderBook.insertOrder(obe);                                //then stores it.
+                cout << "You have enough funds to do the order." << endl;
+                orderBook.insertOrder(obe);
             }
             else
             {
-                std::cout << "Wallet has insufficient funds." << std::endl;
+                cout << "Wallet has insufficient funds." << endl;
             }
-
         }
-
-        catch (const std::exception& e)
+        catch (const exception& e)
         {
-            std::cout << "MerkelMain::enterBid Bad input" << std::endl;
+            cout << "MerkelMain::enterBid Bad input" << endl;
         }
-
     }
 }
 
 void MerkelMain::manageWallet()
 {
-    wallet.printWallet(wallet);
-    
+    wallet1.printWallet(wallet1);
+
     while (true)
     {
         int userOption = 0;
-        std::string line;
-        std::cout << "Enter 1 to add currency to your wallet" << std::endl;
-        std::cout << "Enter 2 to withdraw currency from your wallet" << std::endl;
-        std::cout << "Enter 3 to Return to main menu" << std::endl;
+        string line;
 
-        std::getline(std::cin, line);                       //using cin causes some unexpected problems.thats why we use getline().
+        cout << "Enter 1 to add currency to your wallet" << endl;
+        cout << "Enter 2 to withdraw currency from your wallet" << endl;
+        cout << "Enter 3 to Return to main menu" << endl;
+
+        getline(cin, line);
+
         try
         {
-            userOption = std::stoi(line);
+            userOption = stoi(line);
         }
-        catch (std::exception& e)
+        catch (exception& e)
         {
-            //
+
         }
 
         if (userOption == 1)
         {
-            std::vector<std::string> tokens;
-            std::string userLine;
-            std::cout << "Enter currency type and amount to add. eg) ETH, 10" << std::endl;
-            std::getline(std::cin, userLine);
+            vector<string> tokens;
+            string userLine;
+
+            cout << "Enter currency type and amount to add. eg) ETH, 10" << endl;
+
+            getline(cin, userLine);
+
             tokens = CsvReader::tokenise(userLine, ',');
-            wallet.insertCurrency(tokens[0], stod(tokens[1]));
-            std::cout << "Successfully added money to your account!" << std::endl;
-            wallet.printWallet(wallet);
-            std::cout << std::endl;
+
+            wallet1.insertCurrency(tokens[0], stod(tokens[1]));
+
+            cout << "Successfully added money to your account!" << endl;
+
+            wallet1.printWallet(wallet1);
+
+            cout << endl;
         }
 
         if (userOption == 2)
         {
-            std::vector<std::string> tokens;
-            std::string userLine;
-            std::cout << "Enter currency type and amount to remove. eg) ETH, 10" << std::endl;
-            std::getline(std::cin, userLine);
-            tokens = CsvReader::tokenise(userLine, ',');
-            wallet.removeCurrency(tokens[0], stod(tokens[1]));
-            std::cout << "Successfully removed money from your account!" << std::endl;
-            wallet.printWallet(wallet);
-            std::cout << std::endl;
-        }
-        if (userOption == 3) break;
-    }
+            vector<string> tokens;
+            string userLine;
 
+            cout << "Enter currency type and amount to remove. eg) ETH, 10" << endl;
+
+            getline(cin, userLine);
+
+            tokens = CsvReader::tokenise(userLine, ',');
+
+            wallet1.removeCurrency(tokens[0], stod(tokens[1]));
+
+            cout << "Successfully removed money from your account!" << endl;
+
+            wallet1.printWallet(wallet1);
+
+            cout << endl;
+        }
+
+        if (userOption == 3)
+            break;
+    }
 }
 
-void MerkelMain::goToNextTimeFrame()                //this is where matching should happen.cause in the current time orders must be completed before the next timeframe.
+void MerkelMain::goToNextTimeFrame()
 {
-    std::cout << "Processing Orders" << std::endl;
-    std::vector<OrderBookEntry> sales;
-    for (std::string p : orderBook.getKnownProducts())        // ETH/BTC ,DOGE/BTC .... we have to match all products.
+    cout << endl;
+    cout << "Processing Orders:" << endl;
+
+    vector<OrderBookEntry> sales;
+    vector<OrderBookEntry> allSalesThisFrame;
+
+    for (string p : orderBook.getKnownProducts())
     {
-        std::cout << "matching " << p << std::endl;
+        cout << " matching: ";
+
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
+        cout << p << endl;
+
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
         sales = orderBook.matchAsksToBids(p, currentTime);
-        std::cout << "Sales : " << sales.size() << std::endl;
+
+        cout << " Sales : " << sales.size() << endl;
 
         for (OrderBookEntry& sale : sales)
         {
-            std::cout << "Sale price: " << sale.price << " amount " << sale.amount << std::endl;
-            if (sale.userName == "simuser")                             //if simuser then we have to update the wallet.
+            cout << fixed << setprecision(6);
+            cout << " Sale price: " << sale.price;
+
+            cout << defaultfloat;
+            cout << " \tamount " << sale.amount << endl;
+
+            if (sale.userName == "user1")
             {
-                wallet.processSale(sale);
+                wallet1.processSale(sale);
             }
         }
-    }
-    std::cout << "Going to the next time frame" << std::endl;
-    currentTime = orderBook.getNextTime(currentTime);               //now we can just go to the next time just by clicking 6 number.
-    
-}
 
+        allSalesThisFrame.insert(
+            allSalesThisFrame.end(),
+            sales.begin(),
+            sales.end());
+
+        cout << endl;
+    }
+
+    CsvReader::appendOrdersToCsv("sales.csv", allSalesThisFrame);
+
+    cout << "Going to the next time frame" << endl << endl;
+
+    currentTime = orderBook.getNextTime(currentTime);
+}
 
 void MerkelMain::processUserOption(int userOption)
 {
-   
     if (userOption == 1)
     {
         printHelp();
@@ -254,6 +482,6 @@ void MerkelMain::processUserOption(int userOption)
     }
     else
     {
-        std::cout << "Please choose between 1-6" << std::endl;
+        cout << "Please choose between 1-6" << endl;
     }
 }
