@@ -14,7 +14,7 @@ It is designed as a learning project, but the code is organized in a way that re
 - reusable utility classes,
 - and a main application controller.
 
-##Order Matching Engine
+## Order Matching Engine
 
 The order matching engine is the core of the exchange. It matches buyers and sellers when their orders are compatible.
 
@@ -33,31 +33,24 @@ Completed trades are stored with their price, amount, product, and timestamp.
 
 This simulates the basic behavior of a real cryptocurrency exchange order book while demonstrating sorting, queues, matching algorithms, and state management.
 
-## Overview
+## User Functionalities
 
-CryptoExchangePlatform is a text-based crypto exchange simulation that uses historical order data from CSV files to emulate basic trading behavior.
+Users can interact with the exchange through a simple console menu to:
 
-The application starts with a default wallet and allows the user to:
-- view available trading pairs,
-- place ask orders to sell currency,
-- place bid orders to buy currency,
-- update wallet balances,
-- and advance through market time frames to match orders.
+View Help – Learn how the exchange works and how to use each feature.
+View Exchange Stats – Check trading pairs, active bids/asks, and price statistics.
+Place Buy Orders (Bids) – Specify a product, price, and amount to buy.
+Place Sell Orders (Asks) – Specify a product, price, and amount to sell.
+Manage Wallet – Deposit, withdraw, and view cryptocurrency balances.
+Process Orders – Run the matching engine, execute trades, and move to the next market timeframe.
 
-The codebase is structured around few key domain objects:
-- `OrderBook`
-- `OrderBookEntry`
-- `Wallet`
-- `CsvReader`
-- `MerkelMain`
+## Key Features
 
-## Features
-
-- Console-based trading simulation
-- Historical CSV market data loading
-- Buy and sell order placement
-- Wallet balance tracking
-- Automatic order matching
-- Time-frame based market progression
-- Trade execution logging to `sales.csv`
-- Clean separation between headers and source files
+📊 Historical cryptocurrency market data from CSV files
+⚡ Automated order matching engine
+💰 Best-price order matching
+🔄 Partial order fills
+🛡️ Wallet and order validation
+📝 Trade logging to sales.csv
+⏱️ Historical timeframe progression
+🎨 Color-coded console interface for easier navigation
