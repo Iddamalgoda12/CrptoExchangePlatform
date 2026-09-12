@@ -1,27 +1,51 @@
-CRYPTO EXCHANGE PLATFORM
----------------------------------------------------------------------------
+# CryptoExchangePlatform
 
-Designed to learn OOP concepts.
+A console-based cryptocurrency exchange simulator built in C++ to explore and practice core Object-Oriented Programming concepts.
 
-Highly organized.Text based.Made easy to understand the code.
-Headers are seperated for different tasks.
-You can see headers, their definitions(.cpp) files seperatelty.
-Main function is super clean.
-Also comments are added for the better understandation of the code.
+This project models a simplified trading engine where users can:
+- inspect market data,
+- place buy/sell orders,
+- manage a wallet,
+- and process historical orders over time.
 
-HOW TO RUN.
-----------------------------------------------------------------------
-Just take the files inside the CryptoExchangePlatform and put them in your project main folder.
-compile and run.
-----------------------------------------------------------------------
-You are given your own wallet.
-With some sample currencies like BTC,ETH to do trades.
-You can have a simple sample trading experience.
-Data file is provided with the code.
+It is designed as a learning project, but the code is organized in a way that reflects real-world software structure:
+- clear class separation,
+- header/implementation split,
+- reusable utility classes,
+- and a main application controller.
 
-DRAWBACKS(you can fix them)
---------------------------------------------------------------------------------------------------------------------------------
-In the given data there are no matching asks or bids.So you Have to place a order from yours to work.
-The data file containing trading data must be in sorted order to work.
-Also doesnt work on real time.Works on the timestamps of the datafile data.
-And also doesnt check for Upper Case,Lower Case strings, doesn't ignore white spaces.so you have to input them in the correct format.
+## Overview
+
+CryptoExchangePlatform is a text-based crypto exchange simulation that uses historical order data from CSV files to emulate basic trading behavior.
+
+The application starts with a default wallet and allows the user to:
+- view available trading pairs,
+- place ask orders to sell currency,
+- place bid orders to buy currency,
+- update wallet balances,
+- and advance through market time frames to match orders.
+
+The codebase is built primarily with C++ and structured around a few key domain objects:
+- `OrderBook`
+- `OrderBookEntry`
+- `Wallet`
+- `CsvReader`
+- `MerkelMain`
+
+---
+
+## Features
+
+- Console-based trading simulation
+- Historical CSV market data loading
+- Buy and sell order placement
+- Wallet balance tracking
+- Automatic order matching
+- Time-frame based market progression
+- Trade execution logging to `sales.csv`
+- Clean separation between headers and source files
+
+---
+├── data.csv
+├── sales.csv
+└── test.cpp
